@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 My Music Life</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lime: #c8f135;
+  --coral: #ff6b6b;
+  --sky: #5bc8f5;
+  --peach: #ffb347;
+  --mint: #56e39f;
+  --violet: #c77dff;
+  --bg: #fff9f0;
+  --ink: #1a1a2e;
+  --card: #ffffff;
+  --border: #1a1a2e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Noise texture overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* ── BG blobs ── */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 12s ease-in-out infinite alternate;
+}
+.blob1 { width: 400px; height: 400px; background: var(--lime); top: -100px; right: -100px; animation-delay: 0s; }
+.blob2 { width: 300px; height: 300px; background: var(--coral); bottom: 100px; left: -80px; animation-delay: -4s; }
+.blob3 { width: 250px; height: 250px; background: var(--sky); top: 50%; right: 20%; animation-delay: -8s; }
+@keyframes drift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,20px) scale(1.05); } }
+
+/* ── Main container ── */
+.container { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 16px 80px; }
+
+/* ── Header ── */
+header {
+  padding: 32px 0 24px;
+  text-align: center;
+}
+.logo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ink);
+  color: var(--lime);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .1em;
+  margin-bottom: 20px;
+}
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+h1 em {
+  font-style: italic;
+  color: var(--coral);
+}
+.subtitle {
+  font-size: 14px;
+  color: #888;
+}
+
+/* ── Setup card ── */
+.setup-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  box-shadow: 6px 6px 0 var(--ink);
+  animation: slideUp .4s ease both;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.setup-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: #999;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.input-row input {
+  flex: 1;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: 'Space Mono', monospace;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input-row input:focus {
+  border-color: var(--coral);
+  box-shadow: 3px 3px 0 var(--coral);
+}
+.load-btn {
+  background: var(--lime);
+  color: var(--ink);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .1s, box-shadow .1s;
+  white-space: nowrap;
+}
+.load-btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.load-btn:active { transform: translate(1px,1px); box-shadow: 2px 2px 0 var(--ink); }
+.load-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: 3px 3px 0 var(--ink); }
+
+/* ── Period selector ── */
+.period-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.period-pill {
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  background: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+  color: var(--ink);
+}
+.period-pill.active { background: var(--sky); box-shadow: 2px 2px 0 var(--ink); }
+
+/* ── Error / Loading ── */
+#status-msg {
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  padding: 16px;
+  color: #888;
+  display: none;
+}
+#status-msg.error { color: var(--coral); }
+#status-msg.loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid var(--ink);
+  border-top-color: var(--coral);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Results ── */
+#results { display: none; }
+
+/* ── Stats row ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: 4px 4px 0 var(--ink);
+  animation: slideUp .4s ease both;
+}
+.stat-card:nth-child(1) { background: var(--lime); }
+.stat-card:nth-child(2) { background: var(--coral); color: white; }
+.stat-card:nth-child(3) { background: var(--sky); }
+.stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  display: block;
+}
+.stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  opacity: .7;
+}
+
+/* ── Section heading ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 12px;
+}
+.section-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ── Top artists/tracks cards ── */
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-item {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 3px 3px 0 var(--ink);
+  animation: slideUp .4s ease both;
+  transition: transform .1s, box-shadow .1s;
+  cursor: default;
+}
+.rank-item:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.rank-num {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #ccc;
+  min-width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.rank-item:nth-child(1) .rank-num { color: var(--peach); }
+.rank-item:nth-child(2) .rank-num { color: #aaa; }
+.rank-item:nth-child(3) .rank-num { color: #c87533; }
+.rank-art {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.rank-art-placeholder {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.rank-meta { flex: 1; min-width: 0; }
+.rank-name {
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rank-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+.rank-bar-wrap {
+  height: 4px;
+  background: #eee;
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.rank-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--coral);
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Time heatmap ── */
+.heatmap-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 4px 4px 0 var(--ink);
+  animation: slideUp .4s ease both;
+}
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 30px repeat(24, 1fr);
+  gap: 3px;
+  margin-top: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+}
+.hm-label { display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; color: #aaa; font-size: 8px; }
+.hm-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: #f0f0f0;
+  transition: background .3s;
+  cursor: default;
+  position: relative;
+}
+.hm-cell:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--ink);
+  color: white;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+.hm-hour-labels {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 3px;
+}
+.hm-hour-label { text-align: center; color: #ccc; font-size: 7px; font-family: 'Space Mono', monospace; }
+
+/* ── Recently played ── */
+.recent-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.recent-scroll::-webkit-scrollbar { display: none; }
+.recent-card {
+  flex-shrink: 0;
+  width: 130px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 12px;
+  box-shadow: 3px 3px 0 var(--ink);
+  animation: slideUp .4s ease both;
+}
+.recent-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  object-fit: cover;
+  margin-bottom: 8px;
+  background: var(--bg);
+}
+.recent-img-placeholder {
+  width: 100%; aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  margin-bottom: 8px;
+  background: var(--bg);
+}
+.recent-track { font-size: 12px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+.recent-artist { font-family: 'Space Mono', monospace; font-size: 10px; color: #888; }
+.recent-time { font-family: 'Space Mono', monospace; font-size: 9px; color: #bbb; margin-top: 4px; }
+
+/* ── Tag cloud ── */
+.tag-cloud {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  animation: slideUp .4s ease both;
+}
+.tag-pill {
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: default;
+  transition: transform .1s;
+}
+.tag-pill:hover { transform: scale(1.05); }
+
+/* ── Footer note ── */
+.footer-note {
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #bbb;
+  margin-top: 32px;
+  line-height: 1.8;
+}
+.footer-note a { color: var(--coral); }
+</style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<div class="container">
+  <header>
+    <div class="logo-pill">🎵 MUSIC LIFE</div>
+    <h1>My<br><em>Sound</em><br>Story</h1>
+    <p class="subtitle">Last.fm で音楽履歴を分析</p>
+  </header>
+
+  <!-- Setup -->
+  <div class="setup-card">
+    <div class="setup-label">Last.fm ユーザー名</div>
+    <div class="input-row">
+      <input type="text" id="username-input" placeholder="your_username" autocomplete="off" autocapitalize="off">
+      <button class="load-btn" id="load-btn" onclick="loadData()">読み込む →</button>
+    </div>
+    <div class="period-pills" id="period-pills">
+      <button class="period-pill active" data-period="7day" onclick="setPeriod(this)">7日</button>
+      <button class="period-pill" data-period="1month" onclick="setPeriod(this)">1ヶ月</button>
+      <button class="period-pill" data-period="3month" onclick="setPeriod(this)">3ヶ月</button>
+      <button class="period-pill" data-period="6month" onclick="setPeriod(this)">6ヶ月</button>
+      <button class="period-pill" data-period="12month" onclick="setPeriod(this)">1年</button>
+      <button class="period-pill" data-period="overall" onclick="setPeriod(this)">全期間</button>
+    </div>
+  </div>
+
+  <div id="status-msg"></div>
+
+  <!-- Results -->
+  <div id="results">
+    <!-- Stats row -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- Top Artists -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--peach)">🎤</div>
+      <div class="section-title">よく聴いたアーティスト</div>
+    </div>
+    <div class="rank-list" id="artists-list"></div>
+
+    <!-- Top Tracks -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--mint)">🎵</div>
+      <div class="section-title">よく聴いた曲</div>
+    </div>
+    <div class="rank-list" id="tracks-list"></div>
+
+    <!-- Top Albums -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--violet)">💿</div>
+      <div class="section-title">よく聴いたアルバム</div>
+    </div>
+    <div class="rank-list" id="albums-list"></div>
+
+    <!-- Recent Tracks -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--sky)">🕐</div>
+      <div class="section-title">最近聴いた曲</div>
+    </div>
+    <div class="recent-scroll" id="recent-list"></div>
+
+    <!-- Tags / Genre Cloud -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--lime)">🏷️</div>
+      <div class="section-title">好きなジャンル・タグ</div>
+    </div>
+    <div class="tag-cloud" id="tag-cloud"></div>
+
+    <!-- Listening heatmap -->
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--coral)">🌡️</div>
+      <div class="section-title">聴取時間帯</div>
+    </div>
+    <div class="heatmap-card" id="heatmap-card">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:#aaa;text-align:center">
+        Last.fm APIでは時間帯データは取得できないため、<br>最近の再生履歴から推定しています
+      </div>
+      <div class="heatmap-grid" id="heatmap-grid"></div>
+    </div>
+
+    <div class="footer-note">
+      データ提供: <a href="https://www.last.fm" target="_blank">Last.fm</a><br>
+      Spotifyと連携すると再生ごとに自動記録されます
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const API_KEY = '9d8669e440220282d9455526478aedfe'; // Last.fm public demo key (read-only)
+// → 本番では https://www.last.fm/api/account/create で取得したキーを使用してください
+// ↑ このキーはデモ用パブリックキーです。自分のアプリ用には別途登録が必要です。
+
+let currentPeriod = '7day';
+
+function setPeriod(btn) {
+  document.querySelectorAll('.period-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPeriod = btn.dataset.period;
+  const u = document.getElementById('username-input').value.trim();
+  if (u) loadData();
+}
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+async function lfm(method, extra = {}) {
+  const u = document.getElementById('username-input').value.trim();
+  const params = new URLSearchParams({
+    method, api_key: API_KEY, user: u, format: 'json', limit: 10, ...extra
+  });
+  const r = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+  if (!r.ok) throw new Error('Network error');
+  const d = await r.json();
+  if (d.error) throw new Error(d.message || 'API error');
+  return d;
+}
+
+// ── Load all data ─────────────────────────────────────────────────────────────
+async function loadData() {
+  const username = document.getElementById('username-input').value.trim();
+  if (!username) { showStatus('ユーザー名を入力してください', 'error'); return; }
+
+  const btn = document.getElementById('load-btn');
+  btn.disabled = true;
+  document.getElementById('results').style.display = 'none';
+  showStatus('読み込み中...', 'loading');
+
+  try {
+    const [info, topArtists, topTracks, topAlbums, recent] = await Promise.all([
+      lfm('user.getinfo'),
+      lfm('user.gettopartists', { period: currentPeriod, limit: 10 }),
+      lfm('user.gettoptracks',  { period: currentPeriod, limit: 10 }),
+      lfm('user.gettopalbums',  { period: currentPeriod, limit: 10 }),
+      lfm('user.getrecenttracks', { limit: 20 }),
+    ]);
+
+    // Fetch tags for top 5 artists
+    const tagPromises = (topArtists.topartists?.artist || []).slice(0,5).map(a =>
+      lfm('artist.gettoptags', { artist: a.name }).catch(() => null)
+    );
+    const tagResults = await Promise.all(tagPromises);
+
+    hideStatus();
+    document.getElementById('results').style.display = 'block';
+    renderStats(info, topTracks);
+    renderArtists(topArtists);
+    renderTracks(topTracks);
+    renderAlbums(topAlbums);
+    renderRecent(recent);
+    renderTags(tagResults);
+    renderHeatmap(recent);
+  } catch (e) {
+    showStatus('エラー: ' + e.message + ' — ユーザー名を確認してください', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Enter key support
+document.getElementById('username-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadData();
+});
+
+// ── Status ─────────────────────────────────────────────────────────────────────
+function showStatus(msg, cls) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = cls;
+  el.style.display = 'block';
+}
+function hideStatus() {
+  document.getElementById('status-msg').style.display = 'none';
+}
+
+// ── Render helpers ─────────────────────────────────────────────────────────────
+function fmtNum(n) {
+  const num = parseInt(n) || 0;
+  return num >= 1000 ? (num/1000).toFixed(1) + 'k' : num.toString();
+}
+
+function getImg(images, size = 2) {
+  if (!images) return null;
+  const arr = Array.isArray(images) ? images : [];
+  const img = arr[size] || arr[arr.length-1];
+  return (img && img['#text']) ? img['#text'] : null;
+}
+
+function imgOrPlaceholder(src, emoji, cls, style='') {
+  if (src) return `<img src="${src}" class="${cls}" style="${style}" onerror="this.style.display='none'" alt="">`;
+  return `<div class="${cls.replace('rank-art','rank-art-placeholder').replace('recent-img','recent-img-placeholder')}" style="${style}">${emoji}</div>`;
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function renderStats(info, topTracks) {
+  const u = info.user || {};
+  const total  = fmtNum(u.playcount || 0);
+  const tracks = (topTracks.toptracks?.track || []).length;
+  const since  = u.registered?.['#text'] ? u.registered['#text'].slice(0,4) : '?';
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><span class="stat-num">${total}</span><div class="stat-label">総再生数</div></div>
+    <div class="stat-card"><span class="stat-num">${tracks}</span><div class="stat-label">期間内の曲</div></div>
+    <div class="stat-card"><span class="stat-num">${since}</span><div class="stat-label">利用開始年</div></div>
+  `;
+}
+
+// ── Artists ────────────────────────────────────────────────────────────────────
+function renderArtists(data) {
+  const artists = data.topartists?.artist || [];
+  const max = parseInt(artists[0]?.playcount || 1);
+  const colors = ['var(--coral)','var(--sky)','var(--mint)','var(--peach)','var(--violet)','var(--lime)'];
+  document.getElementById('artists-list').innerHTML = artists.slice(0,7).map((a,i) => {
+    const pct = Math.round(parseInt(a.playcount)/max*100);
+    const img = getImg(a.image, 2);
+    return `<div class="rank-item" style="animation-delay:${i*.05}s">
+      <div class="rank-num">${i+1}</div>
+      ${imgOrPlaceholder(img,'🎤','rank-art','')}
+      <div class="rank-meta">
+        <div class="rank-name">${a.name}</div>
+        <div class="rank-sub">${parseInt(a.playcount).toLocaleString()} plays</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Tracks ─────────────────────────────────────────────────────────────────────
+function renderTracks(data) {
+  const tracks = data.toptracks?.track || [];
+  const max = parseInt(tracks[0]?.playcount || 1);
+  const colors = ['var(--mint)','var(--peach)','var(--violet)','var(--coral)','var(--sky)','var(--lime)'];
+  document.getElementById('tracks-list').innerHTML = tracks.slice(0,7).map((t,i) => {
+    const img = getImg(t.image, 2);
+    const pct = Math.round(parseInt(t.playcount)/max*100);
+    return `<div class="rank-item" style="animation-delay:${i*.05}s">
+      <div class="rank-num">${i+1}</div>
+      ${imgOrPlaceholder(img,'🎵','rank-art','')}
+      <div class="rank-meta">
+        <div class="rank-name">${t.name}</div>
+        <div class="rank-sub">${t.artist?.name || ''} · ${parseInt(t.playcount).toLocaleString()} plays</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Albums ─────────────────────────────────────────────────────────────────────
+function renderAlbums(data) {
+  const albums = data.topalbums?.album || [];
+  const max = parseInt(albums[0]?.playcount || 1);
+  const colors = ['var(--violet)','var(--lime)','var(--coral)','var(--sky)','var(--mint)','var(--peach)'];
+  document.getElementById('albums-list').innerHTML = albums.slice(0,5).map((a,i) => {
+    const img = getImg(a.image, 2);
+    const pct = Math.round(parseInt(a.playcount)/max*100);
+    return `<div class="rank-item" style="animation-delay:${i*.05}s">
+      <div class="rank-num">${i+1}</div>
+      ${imgOrPlaceholder(img,'💿','rank-art','')}
+      <div class="rank-meta">
+        <div class="rank-name">${a.name}</div>
+        <div class="rank-sub">${a.artist?.name || ''} · ${parseInt(a.playcount).toLocaleString()} plays</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Recent Tracks ──────────────────────────────────────────────────────────────
+function renderRecent(data) {
+  const tracks = (data.recenttracks?.track || []).filter(t => !t['@attr']?.nowplaying);
+  document.getElementById('recent-list').innerHTML = tracks.slice(0,15).map((t,i) => {
+    const img = getImg(t.image, 2);
+    const date = t.date?.['#text'] || '再生中...';
+    const timeStr = t.date ? relativeTime(t.date?.uts) : '▶ Now';
+    return `<div class="recent-card" style="animation-delay:${i*.03}s">
+      ${imgOrPlaceholder(img,'🎵','recent-img','')}
+      <div class="recent-track">${t.name}</div>
+      <div class="recent-artist">${t.artist?.['#text'] || t.artist?.name || ''}</div>
+      <div class="recent-time">${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function relativeTime(uts) {
+  if (!uts) return '';
+  const diff = Math.floor(Date.now()/1000 - parseInt(uts));
+  if (diff < 60) return 'たった今';
+  if (diff < 3600) return Math.floor(diff/60) + '分前';
+  if (diff < 86400) return Math.floor(diff/3600) + '時間前';
+  if (diff < 604800) return Math.floor(diff/86400) + '日前';
+  return Math.floor(diff/604800) + '週間前';
+}
+
+// ── Tags ───────────────────────────────────────────────────────────────────────
+function renderTags(tagResults) {
+  const tally = {};
+  tagResults.forEach(r => {
+    if (!r) return;
+    (r.toptags?.tag || []).slice(0,5).forEach(t => {
+      const name = t.name.toLowerCase();
+      if (name.length < 2 || /^\d/.test(name)) return;
+      tally[name] = (tally[name]||0) + parseInt(t.count||1);
+    });
+  });
+  const sorted = Object.entries(tally).sort((a,b) => b[1]-a[1]).slice(0,20);
+  const maxV = sorted[0]?.[1] || 1;
+  const palettes = [
+    {bg:'var(--lime)',c:'var(--ink)'},{bg:'var(--coral)',c:'white'},
+    {bg:'var(--sky)',c:'var(--ink)'},{bg:'var(--peach)',c:'var(--ink)'},
+    {bg:'var(--mint)',c:'var(--ink)'},{bg:'var(--violet)',c:'white'},
+  ];
+  document.getElementById('tag-cloud').innerHTML = sorted.map(([name,v],i) => {
+    const size = 10 + Math.round((v/maxV)*6);
+    const p = palettes[i%palettes.length];
+    return `<span class="tag-pill" style="font-size:${size}px;background:${p.bg};color:${p.c}">${name}</span>`;
+  }).join('');
+}
+
+// ── Heatmap (from recent tracks timestamps) ────────────────────────────────────
+function renderHeatmap(data) {
+  const tracks = data.recenttracks?.track || [];
+  const days = ['日','月','火','水','木','金','土'];
+  // hour x day grid
+  const grid = Array.from({length:7}, () => new Array(24).fill(0));
+  tracks.forEach(t => {
+    if (!t.date?.uts) return;
+    const d = new Date(parseInt(t.date.uts)*1000);
+    grid[d.getDay()][d.getHours()]++;
+  });
+  const maxV = Math.max(1, ...grid.flat());
+  const heatColors = (v) => {
+    if (v === 0) return '#f0f0f0';
+    const t = v/maxV;
+    // lime → coral gradient
+    const r = Math.round(200 + t*55);
+    const g = Math.round(241 - t*130);
+    const b = Math.round(53 + t*58);
+    return `rgb(${r},${g},${b})`;
+  };
+
+  const hourLabels = Array.from({length:24},(_,i)=>i%6===0?i:'').map(h =>
+    `<div class="hm-hour-label">${h !== '' ? h+'h' : ''}</div>`
+  ).join('');
+
+  const rows = grid.map((hours, di) => {
+    const cells = hours.map((v,h) =>
+      `<div class="hm-cell" style="background:${heatColors(v)}" data-tip="${days[di]} ${h}時 ${v}曲"></div>`
+    ).join('');
+    return `<div class="hm-label">${days[di]}</div>${cells}`;
+  }).join('');
+
+  document.getElementById('heatmap-grid').innerHTML =
+    `<div></div><div class="hm-hour-labels">${hourLabels}</div>${rows}`;
+}
+</script>
+</body>
+</html>
